@@ -394,7 +394,8 @@ public class PlayReader {
         // Swagger ReflectionUtils can't handle file or array datatype
         if (!"".equalsIgnoreCase(param.dataType()) && !"file".equalsIgnoreCase(param.dataType()) && !"array".equalsIgnoreCase(param.dataType())){
             type = typeFromString(param.dataType(), cls);
-
+        } else if (param.dataTypeClass() != null && !isVoid(param.dataTypeClass())) {
+            type = param.dataTypeClass();
         }
 
         Parameter result =  ParameterProcessor.applyAnnotations(getSwagger(), p, type == null ? String.class : type, Collections.singletonList(param));

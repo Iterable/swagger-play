@@ -11,6 +11,7 @@ Improvements include:
  - No longer uses deprecated Play configuration methods (proposed in https://github.com/swagger-api/swagger-play/pull/162). Also uses `reference.conf` for default values.
  - Clarifies compile-time DI docs (proposed in https://github.com/swagger-api/swagger-play/pull/157)
  - Handle route delegation properly (https://github.com/swagger-api/swagger-play/pull/132 updated for Play 2.6)
+ - Add support for `dataTypeClass` in `ApiImplicitParam` (https://github.com/swagger-api/swagger-play/pull/174)
 
 Usage
 -----
