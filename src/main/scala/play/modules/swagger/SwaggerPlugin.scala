@@ -89,7 +89,7 @@ class SwaggerPluginImpl @Inject()(lifecycle: ApplicationLifecycle, env: Environm
       case Some(value) => SwaggerPluginHelper.playRoutesClassNameToFileName(value)
     }
 
-    SwaggerPluginHelper.parseRoutes(routesFile, "", env.classLoader)
+    SwaggerPluginHelper.parseRoutes(routesFile, "", env)
   }
 
   val routesRules = Map(routes map { route =>
@@ -129,12 +129,15 @@ object SwaggerPluginHelper {
 
   def playRoutesClassNameToFileName(className: String): String = className.replace(".Routes", ".routes")
 
-  //Parses multiple route files recursively
-  def parseRoutes(routesFile: String, prefix: String, classLoader: ClassLoader): List[PlayRoute] = {
+  // Parses multiple route files recursively
+  def parseRoutes(routesFile: String, prefix: String, env: Environment): List[PlayRoute] = {
     logger.debug(s"Processing route file '$routesFile' with prefix '$prefix'")
 
-    val routesContent = Source.fromInputStream(classLoader.getResourceAsStream(routesFile)).mkString
-    val parsedRoutes = RoutesFileParser.parseContent(routesContent, new File(routesFile))
+    val parsedRoutes = env.resourceAsStream(routesFile).map { stream =>
+      val routesContent = Source.fromInputStream(stream).mkString
+      RoutesFileParser.parseContent(routesContent, new File(routesFile))
+    }.getOrElse(Right(List.empty)) // ignore routes files that don't exist
+
     val routes = parsedRoutes.right.get.collect {
       case route: PlayRoute =>
         logger.debug(s"Adding route '$route'")
@@ -152,7 +155,7 @@ object SwaggerPluginHelper {
         } else {
           s"$prefix/${include.prefix}"
         }
-        parseRoutes(playRoutesClassNameToFileName(include.router), newPrefix, classLoader)
+        parseRoutes(playRoutesClassNameToFileName(include.router), newPrefix, env)
     }.flatten
     logger.debug(s"Finished processing route file '$routesFile'")
     routes
