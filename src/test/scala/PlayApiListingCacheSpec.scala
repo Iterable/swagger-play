@@ -1,19 +1,21 @@
 import java.io.File
 
 import io.swagger.config.ScannerFactory
-import io.swagger.models.{ModelImpl, HttpMethod}
-import io.swagger.models.parameters.{QueryParameter, BodyParameter, PathParameter}
-import io.swagger.models.properties.{RefProperty, ArrayProperty}
+import io.swagger.models.{HttpMethod, ModelImpl}
+import io.swagger.models.parameters.{BodyParameter, PathParameter, QueryParameter}
+import io.swagger.models.properties.{ArrayProperty, RefProperty}
 import play.modules.swagger._
 import org.specs2.mutable._
 import org.specs2.mock.Mockito
 import play.api.Logger
 import io.swagger.util.Json
+import org.specs2.specification.BeforeAfterAll
+
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import play.routes.compiler.{ Route => PlayRoute }
+import play.routes.compiler.{Route => PlayRoute}
 
-class PlayApiListingCacheSpec extends Specification with Mockito {
+class PlayApiListingCacheSpec extends Specification with Mockito with BeforeAfterAll {
 
   // set up mock for Play Router
   val routesList = {
@@ -59,12 +61,16 @@ PUT /api/dog/api/:id testdata.DogController.add0(id:String)
   swaggerConfig setLicense "license"
   swaggerConfig setLicenseUrl "http://licenseUrl"
 
-  PlayConfigFactory.setConfig(swaggerConfig)
-
   var scanner = new PlayApiScanner()
-  ScannerFactory.setScanner(scanner)
   val route = new RouteWrapper(routesRules)
-  RouteFactory.setRoute(route)
+
+  override def afterAll(): Unit = {}
+  override def beforeAll(): Unit = {
+    ApiListingCache.cache = None
+    PlayConfigFactory.setConfig(swaggerConfig)
+    ScannerFactory.setScanner(new PlayApiScanner())
+    RouteFactory.setRoute(new RouteWrapper(routesRules))
+  }
 
   "ApiListingCache" should {
 

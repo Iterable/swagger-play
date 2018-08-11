@@ -84,39 +84,18 @@ class SwaggerPluginImpl @Inject()(lifecycle: ApplicationLifecycle, env: Environm
   val routes = parseRoutes
 
   def parseRoutes: List[PlayRoute] = {
-    def playRoutesClassNameToFileName(className: String) = className.replace(".Routes", ".routes")
-
     val routesFile = config.get[Option[String]]("play.http.router") match {
       case None => "routes"
-      case Some(value) => playRoutesClassNameToFileName(value)
+      case Some(value) => SwaggerPluginHelper.playRoutesClassNameToFileName(value)
     }
-    //Parses multiple route files recursively
-    def parseRoutesHelper(routesFile: String, prefix: String): List[PlayRoute] = {
-      logger.debug(s"Processing route file '$routesFile' with prefix '$prefix'")
 
-      val routesContent =  Source.fromInputStream(env.classLoader.getResourceAsStream(routesFile)).mkString
-      val parsedRoutes = RoutesFileParser.parseContent(routesContent,new File(routesFile))
-      val routes = parsedRoutes.right.get.collect {
-        case route: PlayRoute =>
-          logger.debug(s"Adding route '$route'")
-          Seq(route.copy(path = route.path.copy(parts = StaticPart(prefix) +: route.path.parts)))
-        case include: PlayInclude =>
-          logger.debug(s"Processing route include $include")
-          parseRoutesHelper(playRoutesClassNameToFileName(include.router), include.prefix)
-      }.flatten
-      logger.debug(s"Finished processing route file '$routesFile'")
-      routes
-    }
-    parseRoutesHelper(routesFile, "")
+    SwaggerPluginHelper.parseRoutes(routesFile, "", env.classLoader)
   }
 
-  val routesRules = Map(routes map
-    { route =>
-    {
-      val routeName = s"${route.call.packageName}.${route.call.controller}$$.${route.call.method}"
-      routeName -> route
-    }
-    } : _*)
+  val routesRules = Map(routes map { route =>
+    val routeName = s"${route.call.packageName}.${route.call.controller}$$.${route.call.method}"
+    routeName -> route
+  }: _*)
 
   val route = new RouteWrapper(routesRules)
   RouteFactory.setRoute(route)
@@ -143,4 +122,39 @@ class SwaggerPluginImpl @Inject()(lifecycle: ApplicationLifecycle, env: Environm
     Future.successful(())
   }
 
+}
+
+object SwaggerPluginHelper {
+  private val logger = Logger("swagger")
+
+  def playRoutesClassNameToFileName(className: String): String = className.replace(".Routes", ".routes")
+
+  //Parses multiple route files recursively
+  def parseRoutes(routesFile: String, prefix: String, classLoader: ClassLoader): List[PlayRoute] = {
+    logger.debug(s"Processing route file '$routesFile' with prefix '$prefix'")
+
+    val routesContent = Source.fromInputStream(classLoader.getResourceAsStream(routesFile)).mkString
+    val parsedRoutes = RoutesFileParser.parseContent(routesContent, new File(routesFile))
+    val routes = parsedRoutes.right.get.collect {
+      case route: PlayRoute =>
+        logger.debug(s"Adding route '$route'")
+        (prefix, route.path.parts) match {
+          case ("", _) => Seq(route)
+          case (_, Seq()) => Seq(route.copy(path = route.path.copy(parts = StaticPart(prefix) +: route.path.parts)))
+          case (_, Seq(StaticPart(""))) => Seq(route.copy(path = route.path.copy(parts = StaticPart(prefix) +: route.path.parts)))
+          case (_, Seq(StaticPart("/"))) => Seq(route.copy(path = route.path.copy(parts = StaticPart(prefix) +: route.path.parts)))
+          case (_, _) => Seq(route.copy(path = route.path.copy(parts = StaticPart(prefix) +: StaticPart("/") +: route.path.parts)))
+        }
+      case include: PlayInclude =>
+        logger.debug(s"Processing route include $include")
+        val newPrefix = if (prefix == "") {
+          include.prefix
+        } else {
+          s"$prefix/${include.prefix}"
+        }
+        parseRoutes(playRoutesClassNameToFileName(include.router), newPrefix, classLoader)
+    }.flatten
+    logger.debug(s"Finished processing route file '$routesFile'")
+    routes
+  }
 }
