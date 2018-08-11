@@ -20,14 +20,11 @@ GET /api/fly testdata.FlyController.list
 PUT /api/dog testdata.DogController.add1
 PUT /api/dog/:id testdata.DogController.add0(id:String)
                                                        """, new File("")).right.get.collect {
-      case (route: PlayRoute) => {
-        val routeName = s"${route.call.packageName}.${route.call.controller}$$.${route.call.method}"
-        route
-      }
+      case route: PlayRoute => route
     }
   }
 
-  val routesRules = Map(routesList map 
+  val routesRules = Map(routesList map
   { route =>
     {
       val routeName = s"${route.call.packageName}.${route.call.controller}$$.${route.call.method}"
@@ -42,7 +39,7 @@ PUT /api/dog/:id testdata.DogController.add0(id:String)
   "PlayApiScanner" should {
     "identify correct API classes based on router and API annotations" in {
       val classes = new PlayApiScanner().classes()
-      
+
       classes.toList.length must beEqualTo(2)
       classes.contains(SwaggerContext.loadClass("testdata.DogController")) must beTrue
       classes.contains(SwaggerContext.loadClass("testdata.CatController")) must beTrue

@@ -7,33 +7,37 @@ scalaVersion := "2.11.8"
 
 crossScalaVersions := Seq(scalaVersion.value, "2.12.2")
 
+val PlayVersion = "2.6.17"
+val SwaggerVersion = "1.5.21"
+
 libraryDependencies ++= Seq(
-  "com.fasterxml.jackson.module"  %% "jackson-module-scala"       % "2.8.9",
-  "org.slf4j"          % "slf4j-api"                  % "1.7.21",
-  "io.swagger"         % "swagger-core"               % "1.5.16",
-  "io.swagger"        %% "swagger-scala-module"       % "1.0.5-SNAPSHOT",
-  "com.typesafe.play" %% "routes-compiler"            % "2.6.0",
-  "com.typesafe.play" %% "play-ebean"                 % "4.0.2"            % "test",
-  "org.specs2"        %% "specs2-core"                % "3.8.7"            % "test",
-  "org.specs2"        %% "specs2-mock"                % "3.8.7"            % "test",
-  "org.specs2"        %% "specs2-junit"               % "3.8.7"            % "test",
-  "org.mockito"        % "mockito-core"               % "1.9.5"            % "test")
+  "com.typesafe.play" %% "play" % PlayVersion,
+  "io.swagger" % "swagger-core" % SwaggerVersion,
+  "io.swagger" %% "swagger-scala-module" % "1.0.4",
+  "com.fasterxml.jackson.module"  %% "jackson-module-scala" % "2.9.6",
+  "org.slf4j" % "slf4j-api" % "1.7.21",
+  "com.typesafe.play" %% "routes-compiler" % "2.6.17",
+  "com.typesafe.play" %% "play-ebean" % "4.0.2" % "test",
+  "org.specs2" %% "specs2-core" % "4.3.3" % "test",
+  "org.specs2" %% "specs2-mock" % "4.3.3" % "test",
+  "org.specs2" %% "specs2-junit" % "4.3.3" % "test",
+  "org.mockito" % "mockito-core" % "2.21.0" % "test")
 
-mappings in (Compile, packageBin) ~= { _.filter(!_._1.getName.equals("logback.xml")) }
-
-publishTo <<= version { (v: String) =>
-  val nexus = "https://oss.sonatype.org/"
-  if (v.trim.endsWith("SNAPSHOT"))
-    Some("snapshots" at nexus + "content/repositories/snapshots")
+publishTo := Some(
+  if (isSnapshot.value)
+    Opts.resolver.sonatypeSnapshots
   else
-    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
-}
+    Opts.resolver.sonatypeStaging
+)
 publishArtifact in Test := false
 publishMavenStyle := true
 pomIncludeRepository := { x => false }
 credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 organization := "io.swagger"
 resolvers += Resolver.sonatypeRepo("snapshots")
+
+parallelExecution in Test := false // existing code uses global state which breaks tests
+
 pomExtra := {
   <url>http://swagger.io</url>
   <licenses>
@@ -73,7 +77,10 @@ pomExtra := {
       <name>Francesco Tumanischvili</name>
       <url>http://www.ft-software.net/</url>
     </developer>
+    <developer>
+      <id>gmethvin</id>
+      <name>Greg Methvin</name>
+      <url>https://methvin.net/</url>
+    </developer>
   </developers>
 }
-
-lazy val root = (project in file(".")).enablePlugins(PlayScala)

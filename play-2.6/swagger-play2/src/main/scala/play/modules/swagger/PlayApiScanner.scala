@@ -19,7 +19,7 @@ class PlayApiScanner() extends Scanner with SwaggerConfig {
 
   private def updateInfoFromConfig(swagger: Swagger): Swagger = {
 
-    var info = new Info()
+    val info = new Info()
     val playSwaggerConfig = PlayConfigFactory.getConfig
 
     if (StringUtils.isNotBlank(playSwaggerConfig.description)) {
@@ -72,7 +72,7 @@ class PlayApiScanner() extends Scanner with SwaggerConfig {
     Logger("swagger").info("ControllerScanner - looking for controllers with API annotation")
 
 
-    var routes = RouteFactory.getRoute().getAll().toList
+    val routes = RouteFactory.getRoute().getAll().toList
 
     // get controller names from application routes
     val controllers = routes.map { case (_, route) =>
@@ -80,7 +80,7 @@ class PlayApiScanner() extends Scanner with SwaggerConfig {
     }.distinct
 
 
-    var list = controllers.collect {
+    val list = controllers.collect {
       case className: String if {
         try {
           SwaggerContext.loadClass(className).getAnnotation(classOf[Api]) != null
