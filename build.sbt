@@ -3,9 +3,9 @@ version := "2.0.0-SNAPSHOT"
 
 checksums in update := Nil
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.11.11"
 
-crossScalaVersions := Seq(scalaVersion.value, "2.12.2")
+crossScalaVersions := Seq(scalaVersion.value, "2.12.6")
 
 val PlayVersion = "2.6.17"
 val SwaggerVersion = "1.5.21"
