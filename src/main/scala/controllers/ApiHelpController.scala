@@ -18,20 +18,16 @@ package controllers
 
 import java.io.StringWriter
 
-import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import io.swagger.config.FilterFactory
 import io.swagger.core.filter.SpecFilter
 import io.swagger.models.Swagger
 import io.swagger.util.Json
 import javax.inject.Inject
 import javax.xml.bind.annotation._
-import play.api.Configuration
 import play.api.Logger
 import play.api.http.ContentTypes
-import play.api.http.HttpEntity
 import play.api.mvc._
-import play.modules.swagger.ApiListingCache
+import play.modules.swagger.SwaggerPlugin
 
 import scala.collection.JavaConverters._
 
@@ -60,18 +56,16 @@ class ErrorResponse(@XmlElement var code: Int, @XmlElement var message: String) 
     case _ => "unknown"
   }
 
-  def setType(`type`: String) = {}
-
   def getMessage: String = message
 
   def setMessage(message: String) = this.message = message
 }
 
-class ApiHelpController @Inject() (components: ControllerComponents, configuration: Configuration)
+class ApiHelpController @Inject() (components: ControllerComponents, val swaggerPlugin: SwaggerPlugin)
   extends AbstractController(components) with SwaggerBaseApiController {
 
   def getResources = Action { implicit request =>
-    val host: String = if (configuration.underlying.hasPath("swagger.api.host")) configuration.underlying.getString("swagger.api.host") else request.host
+    val host: String = Option(swaggerPlugin.config.getHost) getOrElse request.host
     val resourceListing: Swagger = getResourceListing(host)
     val response: String = returnXml(request) match {
       case true => toXmlString(resourceListing)
@@ -81,7 +75,7 @@ class ApiHelpController @Inject() (components: ControllerComponents, configurati
   }
 
   def getResource(path: String) = Action { implicit request =>
-    val host: String = if (configuration.underlying.hasPath("swagger.api.host")) configuration.underlying.getString("swagger.api.host") else request.host
+    val host: String = Option(swaggerPlugin.config.getHost) getOrElse request.host
     val apiListing: Swagger = getApiListing(path, host)
     val response: String = returnXml(request) match {
       case true => toXmlString(apiListing)
@@ -93,15 +87,17 @@ class ApiHelpController @Inject() (components: ControllerComponents, configurati
         val msg = new ErrorResponse(500, "api listing for path " + path + " not found")
         Logger("swagger").error(msg.message)
         if (returnXml(request)) {
-          InternalServerError.chunked(Source.single(toXmlString(msg).getBytes("UTF-8"))).as("application/xml")
+          InternalServerError(ByteString(toXmlString(msg))).as(XML(Codec.utf_8))
         } else {
-          InternalServerError.chunked(Source.single(toJsonString(msg).getBytes("UTF-8"))).as("application/json")
+          InternalServerError(ByteString(toJsonString(msg))).as(JSON)
         }
     }
   }
 }
 
 trait SwaggerBaseApiController {
+
+  def swaggerPlugin: SwaggerPlugin
 
   protected def returnXml(request: Request[_]) = request.path.contains(".xml")
 
@@ -112,7 +108,6 @@ trait SwaggerBaseApiController {
    */
   protected def getResourceListing(host: String)(implicit requestHeader: RequestHeader): Swagger = {
     Logger("swagger").debug("ApiHelpInventory.getRootResources")
-    val docRoot = ""
     val queryParams = (for((key, value) <- requestHeader.queryString) yield {
       (key, value.toList.asJava)
     }).asJava
@@ -125,17 +120,12 @@ trait SwaggerBaseApiController {
 
     val f = new SpecFilter
 
-    val specs: Swagger = ApiListingCache.listing(docRoot, host) match {
-      case Some(m) => m
-      case _ => new Swagger()
-    }
+    val specs = swaggerPlugin.apiListingCache.listing(host)
 
-    Option(FilterFactory.getFilter) match {
+    swaggerPlugin.swaggerSpecFilter match {
       case Some(filter) => f.filter(specs, filter, queryParams, cookies, headers)
       case None => specs
     }
-
-
   }
 
   /**
@@ -143,28 +133,23 @@ trait SwaggerBaseApiController {
    */
   protected def getApiListing(resourceName: String, host: String)(implicit requestHeader: RequestHeader): Swagger = {
     Logger("swagger").debug("ApiHelpInventory.getResource(%s)".format(resourceName))
-    val docRoot = ""
     val f = new SpecFilter
     val queryParams = requestHeader.queryString.map {case (key, value) => key -> value.toList.asJava}
     val cookies = requestHeader.cookies.map {cookie => cookie.name -> cookie.value}.toMap.asJava
     val headers = requestHeader.headers.toMap.map {case (key, value) => key -> value.toList.asJava}.asJava
     val pathPart = resourceName
 
-    val l: Option[Swagger] = ApiListingCache.listing(docRoot, host)
-    val specs: Swagger = l match {
-      case Some(m) => m
-      case _ => new Swagger()
-    }
-    val hasFilter = Option(FilterFactory.getFilter)
+    val specs = swaggerPlugin.apiListingCache.listing(host)
 
-    val clone = hasFilter match {
-      case Some(filter) => f.filter(specs, FilterFactory.getFilter, queryParams.asJava, cookies, headers)
+    val clone = swaggerPlugin.swaggerSpecFilter match {
+      case Some(filter) => f.filter(specs, filter, queryParams.asJava, cookies, headers)
       case None => specs
     }
     clone.setPaths(clone.getPaths.asScala.filterKeys(_.startsWith(pathPart) ).asJava)
     clone
   }
 
+  // TODO: looks like this is broken for anything other than strings
   def toXmlString(data: Any): String = {
     if (data.getClass.equals(classOf[String])) {
       data.asInstanceOf[String]

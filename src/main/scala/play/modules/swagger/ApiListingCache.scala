@@ -2,32 +2,27 @@ package play.modules.swagger
 
 import io.swagger.config._
 import io.swagger.models.Swagger
+import javax.inject.Inject
 import play.api.Logger
+import scala.collection.mutable
 
-object ApiListingCache {
-  var cache: Option[Swagger] = None
+class ApiListingCache @Inject()(scanner: Scanner, reader: PlayReader) {
+  private val cache: mutable.Map[String, Swagger] = mutable.Map.empty
 
-  def listing(docRoot: String, host: String): Option[Swagger] = {
-    cache.orElse {
+  def listing(host: String): Swagger = {
+    cache.getOrElseUpdate(host, {
       Logger("swagger").debug("Loading API metadata")
 
-      val scanner = ScannerFactory.getScanner()
       val classes = scanner.classes()
-      val reader = new PlayReader(null)
-      var swagger = reader.read(classes)
-
-      scanner match {
-        case config: SwaggerConfig => {
-          swagger = config.configure(swagger)
-        }
-        case config => {
-          // no config, do nothing
-        }
+      val swagger = reader.read(classes)
+      val result = scanner match {
+        case config: SwaggerConfig =>
+          config.configure(swagger)
+        case _ =>
+          swagger
       }
-      cache = Some(swagger)
-      cache
-    }
-    cache.get.setHost(host)
-    cache
+      result.setHost(host)
+      result
+    })
   }
 }

@@ -21,20 +21,23 @@ class PlayDelegatedApiScannerSpec extends Specification with Mockito with Before
   swaggerConfig.setBasePath("")
   swaggerConfig.setHost("127.0.0.1")
 
+  val env = Environment.simple()
+  val scanner = new PlayApiScanner(swaggerConfig, new RouteWrapper(routesRules), env)
+  val route = new RouteWrapper(routesRules)
+  val playReader = new PlayReader(swaggerConfig, route, null)
+  val apiListingCache = new ApiListingCache(scanner, playReader)
+
   override def afterAll(): Unit = {}
 
   override def beforeAll(): Unit = {
-    ApiListingCache.cache = None
-    PlayConfigFactory.setConfig(swaggerConfig)
-    ScannerFactory.setScanner(new PlayApiScanner())
-    RouteFactory.setRoute(new RouteWrapper(routesRules.asJava))
+    ScannerFactory.setScanner(scanner)
   }
 
 
   "route parsing" should {
     "separate delegated paths correctly" in {
 
-      val urls = ApiListingCache.listing("", "127.0.0.1").get.getPaths.keySet().asScala
+      val urls = apiListingCache.listing("127.0.0.1").getPaths.keySet.asScala
 
       urls must contain("/api/all")
       urls must contain("/api/my/action")

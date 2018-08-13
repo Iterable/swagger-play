@@ -1,11 +1,12 @@
 import java.io.File
 
-import play.modules.swagger._
-import org.specs2.mutable._
 import org.specs2.mock.Mockito
-import scala.collection.JavaConversions._
-import play.modules.swagger.util.SwaggerContext
-import play.routes.compiler.{ Route => PlayRoute }
+import org.specs2.mutable._
+import play.api.Environment
+import play.modules.swagger._
+import play.routes.compiler.{Route => PlayRoute}
+
+import scala.collection.JavaConverters._
 
 class PlayApiScannerSpec extends Specification with Mockito {
 
@@ -24,25 +25,21 @@ PUT /api/dog/:id testdata.DogController.add0(id:String)
     }
   }
 
-  val routesRules = Map(routesList map
-  { route =>
-    {
-      val routeName = s"${route.call.packageName}.${route.call.controller}$$.${route.call.method}"
-      routeName -> route
-    }
+  val routesRules = Map(routesList map { route =>
+    val routeName = s"${route.call.packageName}.${route.call.controller}$$.${route.call.method}"
+    routeName -> route
   } : _*)
 
-
   val route = new RouteWrapper(routesRules)
-  RouteFactory.setRoute(route)
+  val env = Environment.simple()
 
   "PlayApiScanner" should {
     "identify correct API classes based on router and API annotations" in {
-      val classes = new PlayApiScanner().classes()
+      val classes = new PlayApiScanner(new PlaySwaggerConfig, route, env).classes()
 
-      classes.toList.length must beEqualTo(2)
-      classes.contains(SwaggerContext.loadClass("testdata.DogController")) must beTrue
-      classes.contains(SwaggerContext.loadClass("testdata.CatController")) must beTrue
+      classes.asScala must haveSize(2)
+      classes.contains(env.classLoader.loadClass("testdata.DogController")) must beTrue
+      classes.contains(env.classLoader.loadClass("testdata.CatController")) must beTrue
     }
   }
 

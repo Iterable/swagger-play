@@ -34,12 +34,16 @@ public class PlayReader {
     private static final String SUCCESSFUL_OPERATION = "successful operation";
 
     private Swagger swagger;
+    private PlaySwaggerConfig config;
+    private RouteWrapper routes;
 
     public Swagger getSwagger() {
         return swagger;
     }
 
-    public PlayReader(Swagger swagger) {
+    public PlayReader(PlaySwaggerConfig config, RouteWrapper routes, Swagger swagger) {
+        this.routes = routes;
+        this.config = config;
         this.swagger = swagger == null ? new Swagger() : swagger;
     }
 
@@ -64,11 +68,6 @@ public class PlayReader {
     }
 
     private Swagger read(Class<?> cls, boolean readHidden) {
-
-        RouteWrapper routes = RouteFactory.getRoute();
-
-        PlaySwaggerConfig config = PlayConfigFactory.getConfig();
-
         Api api = cls.getAnnotation(Api.class);
 
         Map<String, Tag> tags = new HashMap<>();
@@ -126,7 +125,7 @@ public class PlayReader {
                 if (!routes.exists(fullMethodName)) {
                     continue;
                 }
-                Route route = routes.get(fullMethodName);
+                Route route = routes.apply(fullMethodName);
 
                 String operationPath = getPathFromRoute(route.path(), config.basePath);
 

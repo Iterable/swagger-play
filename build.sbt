@@ -23,6 +23,8 @@ libraryDependencies ++= Seq(
   "org.specs2" %% "specs2-junit" % "4.3.3" % "test",
   "org.mockito" % "mockito-core" % "2.21.0" % "test")
 
+scalacOptions in Test ~= filterConsoleScalacOptions
+
 publishTo := Some(
   if (isSnapshot.value)
     Opts.resolver.sonatypeSnapshots
