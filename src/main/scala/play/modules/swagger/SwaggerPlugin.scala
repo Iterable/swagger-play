@@ -46,20 +46,7 @@ class SwaggerPluginImpl @Inject()(environment: Environment, configuration: Confi
 
   private val logger = Logger("swagger")
 
-  lazy val config: PlaySwaggerConfig = {
-    val config = new PlaySwaggerConfig()
-    config.version = configuration.get[String]("api.version")
-    config.description = configuration.get[String]("swagger.api.info.description")
-    config.basePath = configuration.get[String]("swagger.api.basepath")
-    config.title = configuration.get[String]("swagger.api.info.title")
-    config.host = configuration.get[String]("swagger.api.host")
-    config.contact = configuration.get[String]("swagger.api.info.contact")
-    config.termsOfServiceUrl = configuration.get[String]("swagger.api.info.termsOfServiceUrl")
-    config.license = configuration.get[String]("swagger.api.info.license")
-    config.licenseUrl = configuration.get[String]("swagger.api.info.licenseUrl")
-
-    config
-  }
+  lazy val config: PlaySwaggerConfig = PlaySwaggerConfig(configuration)
 
   lazy val routes = new RouteWrapper({
     val routesFile = configuration.get[Option[String]]("play.http.router") match {
@@ -78,7 +65,7 @@ class SwaggerPluginImpl @Inject()(environment: Environment, configuration: Confi
 
   lazy val scanner = new PlayApiScanner(config, routes, environment)
 
-  lazy val swaggerSpecFilter: Option[SwaggerSpecFilter] = configuration.get[Option[String]]("swagger.filter") match {
+  lazy val swaggerSpecFilter: Option[SwaggerSpecFilter] = config.filterClass match {
     case Some(e) if e.nonEmpty =>
       try {
         val filter = environment.classLoader.loadClass(e).newInstance.asInstanceOf[SwaggerSpecFilter]

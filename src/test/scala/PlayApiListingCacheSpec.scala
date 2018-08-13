@@ -47,17 +47,19 @@ PUT /api/dog/api/:id testdata.DogController.add0(id:String)
   val apiVersion = "test1"
   val basePath = "/api"
 
-  var swaggerConfig = new PlaySwaggerConfig()
-
-  swaggerConfig setDescription "description"
-  swaggerConfig setBasePath basePath
-  swaggerConfig setContact "contact"
-  swaggerConfig setHost "127.0.0.1"
-  swaggerConfig setVersion "beta"
-  swaggerConfig setTitle "title"
-  swaggerConfig setTermsOfServiceUrl "http://termsOfServiceUrl"
-  swaggerConfig setLicense "license"
-  swaggerConfig setLicenseUrl "http://licenseUrl"
+  var swaggerConfig = PlaySwaggerConfig(
+    description = "description",
+    basePath = basePath,
+    contact = "contact",
+    host = "127.0.0.1",
+    version = "beta",
+    title = "title",
+    termsOfServiceUrl = "http://termsOfServiceUrl",
+    license = "license",
+    licenseUrl = "http://licenseUrl",
+    filterClass = None,
+    schemes = Seq.empty
+  )
 
   val env = Environment.simple()
   val scanner = new PlayApiScanner(swaggerConfig, new RouteWrapper(routesRules), env)
@@ -82,12 +84,12 @@ PUT /api/dog/api/:id testdata.DogController.add0(id:String)
       swagger.getBasePath must beEqualTo(basePath)
       swagger.getPaths.size must beEqualTo(7)
       swagger.getDefinitions.size must beEqualTo(8)
-      swagger.getHost must beEqualTo(swaggerConfig.getHost)
-      swagger.getInfo.getContact.getName must beEqualTo(swaggerConfig.getContact)
-      swagger.getInfo.getVersion must beEqualTo(swaggerConfig.getVersion)
-      swagger.getInfo.getTitle must beEqualTo(swaggerConfig.getTitle)
-      swagger.getInfo.getTermsOfService must beEqualTo(swaggerConfig.getTermsOfServiceUrl)
-      swagger.getInfo.getLicense.getName must beEqualTo(swaggerConfig.getLicense)
+      swagger.getHost must beEqualTo(swaggerConfig.host)
+      swagger.getInfo.getContact.getName must beEqualTo(swaggerConfig.contact)
+      swagger.getInfo.getVersion must beEqualTo(swaggerConfig.version)
+      swagger.getInfo.getTitle must beEqualTo(swaggerConfig.title)
+      swagger.getInfo.getTermsOfService must beEqualTo(swaggerConfig.termsOfServiceUrl)
+      swagger.getInfo.getLicense.getName must beEqualTo(swaggerConfig.license)
 
       val pathDoc = swagger.getPaths.get("/document/{settlementId}/files/{fileId}/accept")
       pathDoc.getOperations.size must beEqualTo(1)

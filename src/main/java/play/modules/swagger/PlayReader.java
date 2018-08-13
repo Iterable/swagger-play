@@ -127,7 +127,7 @@ public class PlayReader {
                 }
                 Route route = routes.apply(fullMethodName);
 
-                String operationPath = getPathFromRoute(route.path(), config.basePath);
+                String operationPath = getPathFromRoute(route.path(), config.basePath());
 
                 if (operationPath != null) {
                     final ApiOperation apiOperation = ReflectionUtils.getAnnotation(method, ApiOperation.class);

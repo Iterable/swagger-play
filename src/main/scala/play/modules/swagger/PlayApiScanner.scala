@@ -56,13 +56,10 @@ class PlayApiScanner @Inject()(config: PlaySwaggerConfig, routes: RouteWrapper, 
   }
 
   override def configure(swagger: Swagger): Swagger = {
-    if (config.schemes != null) {
-      for (s <- config.schemes) swagger.scheme(Scheme.forValue(s))
-    }
+    for (s <- config.schemes) swagger.scheme(Scheme.forValue(s))
     updateInfoFromConfig(swagger)
     swagger.host(config.host)
-    swagger.basePath(config.basePath);
-
+    swagger.basePath(config.basePath)
   }
 
   override def getFilterClass(): String = {

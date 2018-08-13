@@ -4,4 +4,4 @@ scala:
   - 2.12.6
 
 script:
-    - sbt compile test publishLocal
+    - sbt ++$TRAVIS_SCALA_VERSION compile test publishLocal

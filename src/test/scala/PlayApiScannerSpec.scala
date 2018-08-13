@@ -35,7 +35,7 @@ PUT /api/dog/:id testdata.DogController.add0(id:String)
 
   "PlayApiScanner" should {
     "identify correct API classes based on router and API annotations" in {
-      val classes = new PlayApiScanner(new PlaySwaggerConfig, route, env).classes()
+      val classes = new PlayApiScanner(PlaySwaggerConfig.defaultReference, route, env).classes()
 
       classes.asScala must haveSize(2)
       classes.contains(env.classLoader.loadClass("testdata.DogController")) must beTrue

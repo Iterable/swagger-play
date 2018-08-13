@@ -65,7 +65,7 @@ class ApiHelpController @Inject() (components: ControllerComponents, val swagger
   extends AbstractController(components) with SwaggerBaseApiController {
 
   def getResources = Action { implicit request =>
-    val host: String = Option(swaggerPlugin.config.getHost) getOrElse request.host
+    val host: String = swaggerPlugin.config.host
     val resourceListing: Swagger = getResourceListing(host)
     val response: String = returnXml(request) match {
       case true => toXmlString(resourceListing)
@@ -75,7 +75,7 @@ class ApiHelpController @Inject() (components: ControllerComponents, val swagger
   }
 
   def getResource(path: String) = Action { implicit request =>
-    val host: String = Option(swaggerPlugin.config.getHost) getOrElse request.host
+    val host: String = swaggerPlugin.config.host
     val apiListing: Swagger = getApiListing(path, host)
     val response: String = returnXml(request) match {
       case true => toXmlString(apiListing)

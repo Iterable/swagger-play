@@ -116,7 +116,8 @@ This plugin works by default if your application uses Runtime dependency injecti
 
 Nevertheless, the plugin can be initialized using compile time dependency injection. For example, you can add the following to your class that extends `BuiltInComponentsFromContext`:
 ```
-val swaggerPlugin = new SwaggerPluginImpl(applicationLifecycle, router, environment) // Can't be lazy because of PlayApiScanner initialization side effect
+// This needs to be eagerly instantiated because this sets global state for swagger
+val swaggerPlugin = new SwaggerPluginImpl(environment, configuration)
 lazy val apiHelpController = new ApiHelpController(controllerComponents, swaggerPlugin)
 ```
 

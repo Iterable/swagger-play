@@ -17,9 +17,10 @@ class PlayDelegatedApiScannerSpec extends Specification with Mockito with Before
     s"${route.call.packageName}.${route.call.controller}$$.${route.call.method}" -> route
   }: _*)
 
-  val swaggerConfig = new PlaySwaggerConfig()
-  swaggerConfig.setBasePath("")
-  swaggerConfig.setHost("127.0.0.1")
+  val swaggerConfig = PlaySwaggerConfig.defaultReference.copy(
+    basePath = "",
+    host = "127.0.0.1"
+  )
 
   val env = Environment.simple()
   val scanner = new PlayApiScanner(swaggerConfig, new RouteWrapper(routesRules), env)
