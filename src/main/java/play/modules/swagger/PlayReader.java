@@ -4,18 +4,15 @@ import com.fasterxml.jackson.databind.JavaType;
 import io.swagger.annotations.*;
 import io.swagger.annotations.Info;
 import io.swagger.converter.ModelConverters;
-import io.swagger.models.*;
 import io.swagger.models.Contact;
 import io.swagger.models.ExternalDocs;
+import io.swagger.models.*;
 import io.swagger.models.Tag;
+import io.swagger.models.auth.In;
 import io.swagger.models.parameters.*;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.properties.*;
-import io.swagger.util.BaseReaderUtils;
-import io.swagger.util.Json;
-import io.swagger.util.ParameterProcessor;
-import io.swagger.util.PrimitiveType;
-import io.swagger.util.ReflectionUtils;
+import io.swagger.util.*;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.modules.swagger.util.CrossUtil;
@@ -295,6 +292,20 @@ public class PlayReader {
 
                 swagger.addTag(tag);
             }
+        }
+
+        for (ApiKeyAuthDefinition ann : config.securityDefinition().apiKeyAuthDefinitions()) {
+            io.swagger.models.auth.ApiKeyAuthDefinition defn = new io.swagger.models.auth.ApiKeyAuthDefinition();
+            defn.setName(ann.name());
+            defn.setIn(In.forValue(ann.in().toValue()));
+            defn.setDescription(ann.description());
+            swagger.addSecurityDefinition(ann.key(), defn);
+        }
+
+        for (BasicAuthDefinition ann : config.securityDefinition().basicAuthDefinitions()) {
+            io.swagger.models.auth.BasicAuthDefinition defn = new io.swagger.models.auth.BasicAuthDefinition();
+            defn.setDescription(ann.description());
+            swagger.addSecurityDefinition(ann.key(), defn);
         }
 
         for (SwaggerDefinition.Scheme scheme : config.schemes()) {

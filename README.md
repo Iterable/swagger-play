@@ -12,6 +12,7 @@ Improvements include:
  - Clarifies compile-time DI docs (proposed in https://github.com/swagger-api/swagger-play/pull/157)
  - Handle route delegation properly (https://github.com/swagger-api/swagger-play/pull/132 updated for Play 2.6)
  - Add support for `dataTypeClass` in `ApiImplicitParam` (https://github.com/swagger-api/swagger-play/pull/174)
+ - Add support for API keys (https://github.com/swagger-api/swagger-play/pull/117)
 
 Usage
 -----
