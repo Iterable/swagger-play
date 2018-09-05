@@ -1,10 +1,14 @@
 # Swagger Play Module
 
+[![Travis CI](https://travis-ci.org/Iterable/swagger-play.svg?branch=master)](https://travis-ci.org/Iterable/swagger-play) ([![Maven](https://img.shields.io/maven-central/v/com.iterable/swagger-play_2.12.svg)](https://mvnrepository.com/artifact/com.iterable/swagger-play_2.12))
+
 ## Overview
 
-This is a module to support Swagger annotations within [Play Framework](http://www.playframework.org) controllers. It is based on the library https://github.com/swagger-api/swagger-play with several improvements. This library uses Swagger 2.0 and supports Play 2.6 and above (and will support newer versions in the future). It can be used for both Scala and Java based applications.
+This is a module to support Swagger annotations within [Play Framework](http://www.playframework.org) controllers. It is based on the library https://github.com/swagger-api/swagger-play with several improvements. This library uses Swagger 1.5 and Play 2.6. It can be used for both Scala and Java based applications.
 
-Improvements include:
+We also would like to support Swagger 2.0 in the future and contributions to that end will be gladly accepted.
+
+Current improvements include:
  - Minimal dependencies: only depends on the core Play module, so it won't bring unnecessary dependencies on the Akka HTTP server or anything else from Play.
  - `SwaggerPlugin` no longer depends on on `Application`.
  - Correct `Content-Length` generation for JSON (originally proposed in https://github.com/swagger-api/swagger-play/pull/176)
@@ -17,17 +21,13 @@ Improvements include:
 Usage
 -----
 
-This library is not yet published to Maven Central. You can publish locally:
+This library is available on Maven Central: ([![Maven](https://img.shields.io/maven-central/v/com.iterable/swagger-play_2.12.svg)](https://mvnrepository.com/artifact/com.iterable/swagger-play_2.12))
 
-```
-sbt publishLocal
-```
-
-and add the dependency:
+To use in your Play project, include the version in your library dependencies:
 
 ```
 libraryDependencies ++= Seq(
-  "io.swagger" %% "swagger-play" % "2.0.0-SNAPSHOT"
+  "com.iterable" %% "swagger-play" % "<version>"
 )
 ```
 

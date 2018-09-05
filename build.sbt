@@ -1,7 +1,5 @@
 name := "swagger-play"
-version := "2.0.0-SNAPSHOT"
-
-checksums in update := Nil
+organization := "com.iterable"
 
 scalaVersion := "2.12.6"
 
@@ -25,20 +23,7 @@ libraryDependencies ++= Seq(
 
 scalacOptions in Test ~= filterConsoleScalacOptions
 
-publishTo := Some(
-  if (isSnapshot.value)
-    Opts.resolver.sonatypeSnapshots
-  else
-    Opts.resolver.sonatypeStaging
-)
-publishArtifact in Test := false
-publishMavenStyle := true
-pomIncludeRepository := { x => false }
-credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
-organization := "io.swagger"
-resolvers += Resolver.sonatypeRepo("snapshots")
-
-parallelExecution in Test := false // existing code uses global state which breaks tests
+parallelExecution in Test := false // Swagger uses global state which breaks parallel tests
 
 pomExtra := {
   <url>http://swagger.io</url>
@@ -86,3 +71,27 @@ pomExtra := {
     </developer>
   </developers>
 }
+
+publishTo := sonatypePublishTo.value
+
+publishArtifact in Test := false
+pomIncludeRepository := { _ => false }
+publishMavenStyle := true
+releaseCrossBuild := true
+
+import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
+
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  releaseStepCommandAndRemaining("+publishSigned"),
+  setNextVersion,
+  commitNextVersion,
+  releaseStepCommand("sonatypeReleaseAll"),
+  pushChanges
+)
