@@ -1,6 +1,6 @@
 # Swagger Play Module
 
-[![Travis CI](https://travis-ci.org/Iterable/swagger-play.svg?branch=master)](https://travis-ci.org/Iterable/swagger-play) ([![Maven](https://img.shields.io/maven-central/v/com.iterable/swagger-play_2.12.svg)](https://mvnrepository.com/artifact/com.iterable/swagger-play_2.12))
+[![Travis CI](https://travis-ci.org/Iterable/swagger-play.svg?branch=master)](https://travis-ci.org/Iterable/swagger-play) [![Maven](https://img.shields.io/maven-central/v/com.iterable/swagger-play_2.12.svg)](https://mvnrepository.com/artifact/com.iterable/swagger-play_2.12)
 
 ## Overview
 
@@ -21,7 +21,7 @@ Current improvements include:
 Usage
 -----
 
-This library is available on Maven Central: ([![Maven](https://img.shields.io/maven-central/v/com.iterable/swagger-play_2.12.svg)](https://mvnrepository.com/artifact/com.iterable/swagger-play_2.12))
+This library is available on Maven Central: [![Maven](https://img.shields.io/maven-central/v/com.iterable/swagger-play_2.12.svg)](https://mvnrepository.com/artifact/com.iterable/swagger-play_2.12)
 
 To use in your Play project, include the version in your library dependencies:
 
