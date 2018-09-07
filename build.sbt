@@ -10,16 +10,18 @@ val SwaggerVersion = "1.5.21"
 
 libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play" % PlayVersion,
+  "com.typesafe.play" %% "routes-compiler" % PlayVersion,
   "io.swagger" % "swagger-core" % SwaggerVersion,
   "io.swagger" %% "swagger-scala-module" % "1.0.4",
-  "com.fasterxml.jackson.module"  %% "jackson-module-scala" % "2.9.6",
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.6",
   "org.slf4j" % "slf4j-api" % "1.7.21",
-  "com.typesafe.play" %% "routes-compiler" % "2.6.17",
+
   "com.typesafe.play" %% "play-ebean" % "4.0.2" % "test",
   "org.specs2" %% "specs2-core" % "4.3.3" % "test",
   "org.specs2" %% "specs2-mock" % "4.3.3" % "test",
   "org.specs2" %% "specs2-junit" % "4.3.3" % "test",
-  "org.mockito" % "mockito-core" % "2.21.0" % "test")
+  "org.mockito" % "mockito-core" % "2.21.0" % "test"
+)
 
 scalacOptions in Test ~= filterConsoleScalacOptions
 
