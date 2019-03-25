@@ -1,11 +1,13 @@
 package testdata
 
 import io.swagger.annotations._
-import play.api.mvc.Controller
-import play.mvc.{Result, Http}
+import play.api.mvc.BaseController
+import play.api.mvc.ControllerComponents
+import play.mvc.Http
+import play.mvc.Result
 
 @Api(value = "/apitest/pointsofinterest", description = "Points of interest")
-class PointOfInterestController extends Controller {
+class PointOfInterestController(override val controllerComponents: ControllerComponents) extends BaseController {
 
   @ApiOperation(value = "Get points of interest",
     notes = "Returns points of interest",

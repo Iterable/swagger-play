@@ -219,7 +219,7 @@ public class PlayReader {
                 try {
                     sb.append(((StaticPart) part).value());
                 } catch (ClassCastException e) {
-                    Logger.warn(String.format("ClassCastException parsing path from route: %s", e.getMessage()));
+                    Logger.of("swagger").warn(String.format("ClassCastException parsing path from route: %s", e.getMessage()));
                 }
             }
         }
@@ -397,7 +397,7 @@ public class PlayReader {
         } else if (param.paramType().equalsIgnoreCase("header")) {
             p = new HeaderParameter();
         } else {
-            Logger.warn("Unkown implicit parameter type: [" + param.paramType() + "]");
+            Logger.of("swagger").warn("Unkown implicit parameter type: [" + param.paramType() + "]");
             return null;
         }
         Type type = null;
@@ -431,7 +431,7 @@ public class PlayReader {
 
             return Thread.currentThread().getContextClassLoader().loadClass(type);
         } catch (Exception e) {
-            Logger.error(String.format("Failed to resolve '%s' into class", type), e);
+            Logger.of("swagger").error(String.format("Failed to resolve '%s' into class", type), e);
         }
         return null;
     }
@@ -605,7 +605,7 @@ public class PlayReader {
             Type[] genericParameterTypes = method.getGenericParameterTypes();
             return Json.mapper().getTypeFactory().constructType(genericParameterTypes[position], cls);
         } catch (Exception e) {
-            Logger.error(String.format("Exception getting parameter type for method %s, param %s at position %d", method, simpleTypeName, position), e);
+            Logger.of("swagger").error(String.format("Exception getting parameter type for method %s, param %s at position %d", method, simpleTypeName, position), e);
             return null;
         }
 
@@ -615,7 +615,7 @@ public class PlayReader {
         try {
             return Arrays.asList(paramAnnotations[fieldPosition]);
         } catch (Exception e) {
-            Logger.error(String.format("Exception getting parameter type for %s at position %d", simpleTypeName, fieldPosition), e);
+            Logger.of("swagger").error(String.format("Exception getting parameter type for %s at position %d", simpleTypeName, fieldPosition), e);
             return null;
         }
     }
@@ -801,7 +801,7 @@ public class PlayReader {
             try {
                 httpMethod = route.verb().toString().toLowerCase();
             } catch (Exception e) {
-                Logger.error("http method not found for method: " + method.getName(), e);
+                Logger.of("swagger").error("http method not found for method: " + method.getName(), e);
             }
         }
         if (httpMethod == null){

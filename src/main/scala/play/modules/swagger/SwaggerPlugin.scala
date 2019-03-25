@@ -57,10 +57,10 @@ class SwaggerPluginImpl @Inject()(environment: Environment, configuration: Confi
     val routesList = SwaggerPluginHelper.parseRoutes(routesFile, "", environment)
 
     Map(routesList map { route =>
-      val routeName = s"${route.call.packageName}.${route.call.controller}$$.${route.call.method}"
+      val call = route.call
+      val routeName = (call.packageName.toSeq ++ Seq(call.controller + "$", call.method)).mkString(".")
       routeName -> route
     }: _*)
-
   })
 
   lazy val scanner = new PlayApiScanner(config, routes, environment)

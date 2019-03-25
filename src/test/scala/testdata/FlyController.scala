@@ -1,8 +1,9 @@
 package testdata
 
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.BaseController
+import play.api.mvc.ControllerComponents
 
-object FlyController extends Controller {
+class FlyController(override val controllerComponents: ControllerComponents) extends BaseController {
 
   def list = Action {
     request =>

@@ -72,7 +72,7 @@ class PlayApiScanner @Inject()(config: PlaySwaggerConfig, routes: RouteWrapper, 
 
     // get controller names from application routes
     val controllers = routes.getAll.toSeq.map { case (_, route) =>
-      s"${route.call.packageName}.${route.call.controller}"
+      (route.call.packageName.toSeq :+ route.call.controller).mkString(".")
     }.distinct
 
 

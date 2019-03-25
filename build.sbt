@@ -1,11 +1,11 @@
 name := "swagger-play"
 organization := "com.iterable"
 
-scalaVersion := "2.12.6"
+scalaVersion := "2.12.8"
 
 crossScalaVersions := Seq(scalaVersion.value, "2.11.12")
 
-val PlayVersion = "2.6.17"
+val PlayVersion = "2.7.0"
 val SwaggerVersion = "1.5.21"
 
 libraryDependencies ++= Seq(

@@ -14,7 +14,7 @@ class PlayDelegatedApiScannerSpec extends Specification with Mockito with Before
     SwaggerPluginHelper.parseRoutes("delegation", "/api", Environment.simple())
 
   val routesRules: Map[String, Route] = Map(routes.map { route: Route =>
-    s"${route.call.packageName}.${route.call.controller}$$.${route.call.method}" -> route
+    (route.call.packageName.toSeq ++ Seq(route.call.controller + "$", route.call.method)).mkString(".") -> route
   }: _*)
 
   val swaggerConfig = PlaySwaggerConfig.defaultReference.copy(
