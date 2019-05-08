@@ -91,7 +91,7 @@ public class PlayReader {
                 produces = toArray(api.produces());
             }
             if (!api.consumes().isEmpty()) {
-                consumes =  toArray(api.consumes());
+                consumes = toArray(api.consumes());
             }
             globalSchemes.addAll(parseSchemes(api.protocols()));
             Authorization[] authorizations = api.authorizations();
@@ -160,7 +160,8 @@ public class PlayReader {
                                 }
                             }
 
-                            operation.getVendorExtensions().putAll(BaseReaderUtils.parseExtensions(apiOperation.extensions()));
+                            operation.getVendorExtensions()
+                                    .putAll(BaseReaderUtils.parseExtensions(apiOperation.extensions()));
                         }
                         if (operation.getConsumes() == null) {
                             for (String mediaType : consumes) {
@@ -178,7 +179,8 @@ public class PlayReader {
                                 operation.tag(tagString);
                             }
                         }
-                        // Only add global @Api securities if operation doesn't already have more specific securities
+                        // Only add global @Api securities if operation doesn't already have more
+                        // specific securities
                         if (operation.getSecurity() == null) {
                             for (SecurityRequirement security : securities) {
                                 operation.security(security);
@@ -219,23 +221,27 @@ public class PlayReader {
                 try {
                     sb.append(((StaticPart) part).value());
                 } catch (ClassCastException e) {
-                    Logger.of("swagger").warn(String.format("ClassCastException parsing path from route: %s", e.getMessage()));
+                    Logger.of("swagger")
+                            .warn(String.format("ClassCastException parsing path from route: %s", e.getMessage()));
                 }
             }
         }
         StringBuilder basePathFilter = new StringBuilder(basePath);
-        if (basePath.startsWith("/")) basePathFilter.deleteCharAt(0);
-        if (!basePath.endsWith("/")) basePathFilter.append("/");
+        if (basePath.startsWith("/"))
+            basePathFilter.deleteCharAt(0);
+        if (!basePath.endsWith("/"))
+            basePathFilter.append("/");
         String basePathString = basePathFilter.toString();
 
         String pathPatternString = sb.toString();
         StringBuilder operationPath = new StringBuilder();
-        if ((pathPatternString.startsWith("/") && pathPatternString.startsWith(basePathString, 1)) ||
-                (pathPatternString.startsWith(basePathString)))
+        if ((pathPatternString.startsWith("/") && pathPatternString.startsWith(basePathString, 1))
+                || (pathPatternString.startsWith(basePathString)))
             operationPath.append(pathPatternString.replaceFirst(basePathString, ""));
         else
             operationPath.append(pathPatternString);
-        if (!operationPath.toString().startsWith("/")) operationPath.insert(0, "/");
+        if (!operationPath.toString().startsWith("/"))
+            operationPath.insert(0, "/");
         return operationPath.toString();
     }
 
@@ -284,8 +290,8 @@ public class PlayReader {
                 tag.setDescription(tagConfig.description());
 
                 if (!tagConfig.externalDocs().value().isEmpty()) {
-                    tag.setExternalDocs(new ExternalDocs(tagConfig.externalDocs().value(),
-                            tagConfig.externalDocs().url()));
+                    tag.setExternalDocs(
+                            new ExternalDocs(tagConfig.externalDocs().value(), tagConfig.externalDocs().url()));
                 }
 
                 tag.getVendorExtensions().putAll(BaseReaderUtils.parseExtensions(tagConfig.extensions()));
@@ -305,6 +311,17 @@ public class PlayReader {
         for (BasicAuthDefinition ann : config.securityDefinition().basicAuthDefinitions()) {
             io.swagger.models.auth.BasicAuthDefinition defn = new io.swagger.models.auth.BasicAuthDefinition();
             defn.setDescription(ann.description());
+            swagger.addSecurityDefinition(ann.key(), defn);
+        }
+
+        for (OAuth2Definition ann : config.securityDefinition().oAuth2Definitions()) {
+            io.swagger.models.auth.OAuth2Definition defn = new io.swagger.models.auth.OAuth2Definition();
+            defn.setTokenUrl(ann.tokenUrl());
+            defn.setAuthorizationUrl(ann.authorizationUrl());
+            defn.setFlow(ann.flow().name().toLowerCase());
+            for (Scope scope : ann.scopes()) {
+                defn.addScope(scope.name(), scope.description());
+            }
             swagger.addSecurityDefinition(ann.key(), defn);
         }
 
@@ -402,17 +419,19 @@ public class PlayReader {
         }
         Type type = null;
         // Swagger ReflectionUtils can't handle file or array datatype
-        if (!"".equalsIgnoreCase(param.dataType()) && !"file".equalsIgnoreCase(param.dataType()) && !"array".equalsIgnoreCase(param.dataType())){
+        if (!"".equalsIgnoreCase(param.dataType()) && !"file".equalsIgnoreCase(param.dataType())
+                && !"array".equalsIgnoreCase(param.dataType())) {
             type = typeFromString(param.dataType(), cls);
         } else if (param.dataTypeClass() != null && !isVoid(param.dataTypeClass())) {
             type = param.dataTypeClass();
         }
 
-        Parameter result =  ParameterProcessor.applyAnnotations(getSwagger(), p, type == null ? String.class : type, Collections.singletonList(param));
+        Parameter result = ParameterProcessor.applyAnnotations(getSwagger(), p, type == null ? String.class : type,
+                Collections.singletonList(param));
 
         if (result instanceof AbstractSerializableParameter && type != null) {
             Property schema = createProperty(type);
-            ((AbstractSerializableParameter)p).setProperty(schema);
+            ((AbstractSerializableParameter) p).setProperty(schema);
         }
 
         return result;
@@ -425,9 +444,10 @@ public class PlayReader {
             return primitive.getKeyClass();
         }
         try {
-            Type routeType = getOptionTypeFromString (type, cls);
+            Type routeType = getOptionTypeFromString(type, cls);
 
-            if (routeType != null) return routeType;
+            if (routeType != null)
+                return routeType;
 
             return Thread.currentThread().getContextClassLoader().loadClass(type);
         } catch (Exception e) {
@@ -459,9 +479,7 @@ public class PlayReader {
 
             defaultResponseHeaders = parseResponseHeaders(apiOperation.responseHeaders());
 
-            operation
-                    .summary(apiOperation.value())
-                    .description(apiOperation.notes());
+            operation.summary(apiOperation.value()).description(apiOperation.notes());
 
             if (apiOperation.response() != null && !isVoid(apiOperation.response())) {
                 responseType = apiOperation.response();
@@ -509,8 +527,8 @@ public class PlayReader {
             if (property != null) {
                 final Property responseProperty = ContainerWrapper.wrapContainer(responseContainer, property);
                 final int responseCode = apiOperation == null ? 200 : apiOperation.code();
-                operation.response(responseCode, new Response().description(SUCCESSFUL_OPERATION).schema(responseProperty)
-                        .headers(defaultResponseHeaders));
+                operation.response(responseCode, new Response().description(SUCCESSFUL_OPERATION)
+                        .schema(responseProperty).headers(defaultResponseHeaders));
                 appendModels(responseType);
             }
         }
@@ -521,9 +539,7 @@ public class PlayReader {
             for (ApiResponse apiResponse : responseAnnotation.value()) {
                 Map<String, Property> responseHeaders = parseResponseHeaders(apiResponse.responseHeaders());
 
-                Response response = new Response()
-                        .description(apiResponse.message())
-                        .headers(responseHeaders);
+                Response response = new Response().description(apiResponse.message()).headers(responseHeaders);
 
                 if (apiResponse.code() == 0) {
                     operation.defaultResponse(response);
@@ -547,7 +563,6 @@ public class PlayReader {
             operation.setDeprecated(true);
         }
 
-
         List<Parameter> parameters = getParameters(cls, method, route);
 
         parameters.forEach(operation::parameter);
@@ -559,7 +574,6 @@ public class PlayReader {
         return operation;
     }
 
-
     final static class OptionTypeResolver {
         private Option<Integer> optionTypeInt;
         private Option<Long> optionTypeLong;
@@ -570,7 +584,7 @@ public class PlayReader {
         private Option<Double> optionTypeDouble;
         private Option<Short> optionTypeShort;
 
-        static Type resolveOptionType (String innerType, Class<?> cls) {
+        static Type resolveOptionType(String innerType, Class<?> cls) {
             try {
                 return Json.mapper().getTypeFactory().constructType(
                         OptionTypeResolver.class.getDeclaredField("optionType" + innerType).getGenericType(), cls);
@@ -580,15 +594,15 @@ public class PlayReader {
         }
     }
 
-    private static Type getOptionTypeFromString (String simpleTypeName, Class<?> cls) {
+    private static Type getOptionTypeFromString(String simpleTypeName, Class<?> cls) {
 
-        if (simpleTypeName == null) return null;
+        if (simpleTypeName == null)
+            return null;
         String regex = "(Option|scala\\.Option)\\s*\\[\\s*(Int|Long|Float|Double|Byte|Short|Char|Boolean)\\s*\\]\\s*$";
 
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(simpleTypeName);
-        if (matcher.find())
-        {
+        if (matcher.find()) {
             String enhancedType = matcher.group(2);
             return OptionTypeResolver.resolveOptionType(enhancedType, cls);
         } else {
@@ -599,31 +613,38 @@ public class PlayReader {
     private Type getParamType(Class<?> cls, Method method, String simpleTypeName, int position) {
 
         try {
-            Type type = getOptionTypeFromString (simpleTypeName, cls);
-            if (type != null) return type;
+            Type type = getOptionTypeFromString(simpleTypeName, cls);
+            if (type != null)
+                return type;
 
             Type[] genericParameterTypes = method.getGenericParameterTypes();
             return Json.mapper().getTypeFactory().constructType(genericParameterTypes[position], cls);
         } catch (Exception e) {
-            Logger.of("swagger").error(String.format("Exception getting parameter type for method %s, param %s at position %d", method, simpleTypeName, position), e);
+            Logger.of("swagger")
+                    .error(String.format("Exception getting parameter type for method %s, param %s at position %d",
+                            method, simpleTypeName, position), e);
             return null;
         }
 
     }
 
-    private List<Annotation> getParamAnnotations(Class<?> cls, Type[] genericParameterTypes, Annotation[][] paramAnnotations, String simpleTypeName, int fieldPosition) {
+    private List<Annotation> getParamAnnotations(Class<?> cls, Type[] genericParameterTypes,
+            Annotation[][] paramAnnotations, String simpleTypeName, int fieldPosition) {
         try {
             return Arrays.asList(paramAnnotations[fieldPosition]);
         } catch (Exception e) {
-            Logger.of("swagger").error(String.format("Exception getting parameter type for %s at position %d", simpleTypeName, fieldPosition), e);
+            Logger.of("swagger").error(String.format("Exception getting parameter type for %s at position %d",
+                    simpleTypeName, fieldPosition), e);
             return null;
         }
     }
 
-    private List<Annotation> getParamAnnotations(Class<?> cls, Method method, String simpleTypeName, int fieldPosition) {
+    private List<Annotation> getParamAnnotations(Class<?> cls, Method method, String simpleTypeName,
+            int fieldPosition) {
         Type[] genericParameterTypes = method.getGenericParameterTypes();
         Annotation[][] paramAnnotations = method.getParameterAnnotations();
-        List<Annotation> annotations = getParamAnnotations(cls, genericParameterTypes, paramAnnotations, simpleTypeName, fieldPosition);
+        List<Annotation> annotations = getParamAnnotations(cls, genericParameterTypes, paramAnnotations, simpleTypeName,
+                fieldPosition);
         if (annotations != null) {
             return annotations;
         }
@@ -640,35 +661,39 @@ public class PlayReader {
 
     private List<Parameter> getParameters(Class<?> cls, Method method, Route route) {
         // TODO now consider only parameters defined in route, excluding body parameters
-        // understand how to possibly infer body/form params e.g. from @BodyParser or other annotation
+        // understand how to possibly infer body/form params e.g. from @BodyParser or
+        // other annotation
 
         List<Parameter> parameters = new ArrayList<>();
         if (!route.call().parameters().isDefined()) {
             return parameters;
         }
-        scala.collection.Iterator<play.routes.compiler.Parameter> iter  = route.call().parameters().get().iterator();
+        scala.collection.Iterator<play.routes.compiler.Parameter> iter = route.call().parameters().get().iterator();
 
         int fieldPosition = 0;
         while (iter.hasNext()) {
             play.routes.compiler.Parameter p = iter.next();
-            if (!p.fixed().isEmpty()) continue;
+            if (!p.fixed().isEmpty())
+                continue;
             Parameter parameter;
             String def = CrossUtil.getParameterDefaultField(p);
-            if (def.startsWith("\"") && def.endsWith("\"")){
-                def = def.substring(1,def.length()-1);
+            if (def.startsWith("\"") && def.endsWith("\"")) {
+                def = def.substring(1, def.length() - 1);
             }
             Type type = getParamType(cls, method, p.typeName(), fieldPosition);
             Property schema = createProperty(type);
             if (route.path().has(p.name())) {
                 // it's a path param
                 parameter = new PathParameter();
-                ((PathParameter)parameter).setDefaultValue(def);
-                if (schema != null) ((PathParameter)parameter).setProperty(schema);
+                ((PathParameter) parameter).setDefaultValue(def);
+                if (schema != null)
+                    ((PathParameter) parameter).setProperty(schema);
             } else {
                 // it's a query string param
                 parameter = new QueryParameter();
-                ((QueryParameter)parameter).setDefaultValue(def);
-                if (schema != null) ((QueryParameter)parameter).setProperty(schema);
+                ((QueryParameter) parameter).setDefaultValue(def);
+                if (schema != null)
+                    ((QueryParameter) parameter).setProperty(schema);
             }
             parameter.setName(p.name());
             List<Annotation> annotations = getParamAnnotations(cls, method, p.typeName(), fieldPosition);
@@ -772,8 +797,8 @@ public class PlayReader {
                     if (!isVoid(cls)) {
                         final Property property = ModelConverters.getInstance().readAsProperty(cls);
                         if (property != null) {
-                            Property responseProperty = ContainerWrapper.wrapContainer(header.responseContainer(), property,
-                                    ContainerWrapper.ARRAY, ContainerWrapper.LIST, ContainerWrapper.SET);
+                            Property responseProperty = ContainerWrapper.wrapContainer(header.responseContainer(),
+                                    property, ContainerWrapper.ARRAY, ContainerWrapper.LIST, ContainerWrapper.SET);
                             responseProperty.setDescription(description);
                             responseHeaders.put(name, responseProperty);
                             appendModels(cls);
@@ -794,8 +819,7 @@ public class PlayReader {
         }
     }
 
-    public String extractOperationMethod(ApiOperation apiOperation,
-                                         Method method, Route route) {
+    public String extractOperationMethod(ApiOperation apiOperation, Method method, Route route) {
         String httpMethod = null;
         if (route != null) {
             try {
@@ -804,7 +828,7 @@ public class PlayReader {
                 Logger.of("swagger").error("http method not found for method: " + method.getName(), e);
             }
         }
-        if (httpMethod == null){
+        if (httpMethod == null) {
             if (!StringUtils.isEmpty(apiOperation.httpMethod())) {
                 httpMethod = apiOperation.httpMethod();
             }
@@ -812,11 +836,12 @@ public class PlayReader {
         return httpMethod;
     }
 
-    private String[] toArray(String csString){
-        if (StringUtils.isEmpty(csString)) return new String[] {csString};
+    private String[] toArray(String csString) {
+        if (StringUtils.isEmpty(csString))
+            return new String[] { csString };
         int i = 0;
         String[] result = csString.split(",");
-        for (String c: result){
+        for (String c : result) {
             result[i] = c.trim();
             i++;
         }
@@ -858,7 +883,8 @@ public class PlayReader {
         }
 
         public static Property wrapContainer(String container, Property property, ContainerWrapper... allowed) {
-            final Set<ContainerWrapper> tmp = allowed.length > 0 ? EnumSet.copyOf(Arrays.asList(allowed)) : EnumSet.allOf(ContainerWrapper.class);
+            final Set<ContainerWrapper> tmp = allowed.length > 0 ? EnumSet.copyOf(Arrays.asList(allowed))
+                    : EnumSet.allOf(ContainerWrapper.class);
             for (ContainerWrapper wrapper : tmp) {
                 final Property prop = wrapper.wrap(container, property);
                 if (prop != null) {

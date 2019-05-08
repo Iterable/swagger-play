@@ -5,13 +5,15 @@ import play.api.mvc.BaseController
 import play.api.mvc.ControllerComponents
 
 @Api(value = "/apitest/cats", description = "play with cats")
+@SwaggerDefinition(securityDefinition = new SecurityDefinition(oAuth2Definitions = Array(new OAuth2Definition(key = "oauth2",
+  flow = OAuth2Definition.Flow.APPLICATION, tokenUrl= "/oauth/token", authorizationUrl = "/authorize", scopes = Array(new Scope(name = "write_pets", description = "modify pets"))))))
 class CatController(override val controllerComponents: ControllerComponents) extends BaseController {
 
   @ApiOperation(value = "addCat1",
       httpMethod = "PUT",
-      authorizations = Array(),
       consumes = "",
-      protocols = "")
+      protocols = "",
+      authorizations = Array(new Authorization(value="oauth2", scopes = Array(new AuthorizationScope(scope = "write_pets", description = "Modify pets")))))
     @ApiImplicitParams(Array(
       new ApiImplicitParam(name = "cat", value = "Cat object to add", required = true, dataType = "testdata.Cat", paramType = "body")))
     def add1 = Action {
@@ -20,7 +22,8 @@ class CatController(override val controllerComponents: ControllerComponents) ext
 
     @ApiOperation(value = "Updates a new Cat",
       notes = "Updates cats nicely",
-      httpMethod = "POST")
+      httpMethod = "POST",
+      authorizations = Array(new Authorization(value="oauth2", scopes = Array(new AuthorizationScope(scope = "write_pets", description = "Modify pets")))))
     @ApiResponses(Array(
       new ApiResponse(code = 405, message = "Invalid input")))
     @ApiImplicitParams(Array(
