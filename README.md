@@ -4,7 +4,7 @@
 
 ## Overview
 
-This is a module to support Swagger annotations within [Play Framework](http://www.playframework.org) controllers. It is based on the library https://github.com/swagger-api/swagger-play with several improvements. This library uses Swagger 1.5 and Play 2.6. It can be used for both Scala and Java based applications.
+This is a module to support Swagger annotations within [Play Framework](http://www.playframework.org) controllers. It is based on the library https://github.com/swagger-api/swagger-play with several improvements. This library uses Swagger 1.5 and supports Play 2.6 (version 1.0.x) and Play 2.7 (version 2.0.x). It can be used for both Scala and Java based applications.
 
 We also would like to support Swagger 2.0 in the future and contributions to that end will be gladly accepted.
 
@@ -17,6 +17,7 @@ Current improvements include:
  - Handle route delegation properly (https://github.com/swagger-api/swagger-play/pull/132 updated for Play 2.6)
  - Add support for `dataTypeClass` in `ApiImplicitParam` (https://github.com/swagger-api/swagger-play/pull/174)
  - Add support for API keys (https://github.com/swagger-api/swagger-play/pull/117)
+ - Add support for OAuth2 (https://github.com/swagger-api/swagger-play/pull/183)
 
 Usage
 -----
