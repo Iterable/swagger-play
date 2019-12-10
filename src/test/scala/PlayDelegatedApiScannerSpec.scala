@@ -6,7 +6,7 @@ import play.api.Environment
 import play.modules.swagger._
 import play.routes.compiler.Route
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class PlayDelegatedApiScannerSpec extends Specification with Mockito with BeforeAfterAll {
 

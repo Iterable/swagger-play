@@ -104,7 +104,7 @@ object SwaggerPluginHelper {
       RoutesFileParser.parseContent(routesContent, new File(routesFile))
     }.getOrElse(Right(List.empty)) // ignore routes files that don't exist
 
-    val routes = parsedRoutes.right.get.collect {
+    val routes = parsedRoutes.getOrElse(throw new NoSuchElementException("Parsed routes not found!")).collect {
       case route: PlayRoute =>
         logger.debug(s"Adding route '$route'")
         (prefix, route.path.parts) match {

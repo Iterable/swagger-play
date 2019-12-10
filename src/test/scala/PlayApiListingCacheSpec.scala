@@ -13,7 +13,7 @@ import io.swagger.util.Json
 import org.specs2.specification.BeforeAfterAll
 import play.routes.compiler.Route
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import play.routes.compiler.{Route => PlayRoute}
 
 class PlayApiListingCacheSpec extends Specification with Mockito with BeforeAfterAll {

@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils
 import play.api.Environment
 import play.api.Logger
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Identifies Play Controllers annotated as Swagger API's.
